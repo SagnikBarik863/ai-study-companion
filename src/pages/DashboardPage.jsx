@@ -15,7 +15,6 @@ import {
   calculateWeeklyActivity,
   formatMinutes,
   formatStudyStreakMessage,
-  getProgressValue,
 } from '../services/formatters';
 
 export default function DashboardPage() {
@@ -142,18 +141,26 @@ export default function DashboardPage() {
                       to={`/subjects/${subject.id}`}
                       className="block rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                     >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="space-y-4">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900">{subject.title}</h3>
                           <p className="mt-2 text-sm leading-6 text-slate-600">
                             {subject.description}
                           </p>
                         </div>
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
-                          <p className="text-slate-500">Progress</p>
-                          <p className="mt-1 font-semibold text-slate-900">
-                            {getProgressValue(subject.totalDuration, subject.sessionCount)}%
-                          </p>
+                        <div className="grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 px-4 py-4 text-sm sm:grid-cols-3">
+                          <div>
+                            <p className="text-slate-500">Sessions</p>
+                            <p className="mt-1 font-semibold text-slate-900">
+                              {subject.sessionCount || 0}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-500">Study time</p>
+                            <p className="mt-1 font-semibold text-slate-900">
+                              {formatMinutes(subject.totalDuration || 0)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </Link>

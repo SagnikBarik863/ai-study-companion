@@ -68,7 +68,7 @@ export default function AppShell({ title, subtitle, children, actions }) {
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Study Space</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Focused tools for progress, subjects, and quick revision.
+                  Focused tools for subjects, study sessions, and quick revision.
                 </p>
               </div>
             </div>

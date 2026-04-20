@@ -10,8 +10,12 @@ export default function SummaryPage() {
     >
       <div className="page-stack">
         <FirebaseNotice />
-        <section className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
-          <div className="section-card">
+        <section className="grid gap-6 xl:grid-cols-[0.32fr_0.68fr] xl:items-start">
+          <div className="xl:order-2">
+            <SummaryGenerator />
+          </div>
+
+          <div className="section-card xl:order-1">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent-700">
               How to use it
             </p>
@@ -28,8 +32,6 @@ export default function SummaryPage() {
               "Photosynthesis steps", or "French Revolution causes".
             </div>
           </div>
-
-          <SummaryGenerator />
         </section>
       </div>
     </AppShell>

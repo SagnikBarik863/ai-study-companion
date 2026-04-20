@@ -28,8 +28,8 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
 
   return (
     <section className="section-card">
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-xl">
+      <div className="space-y-8">
+        <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-coral-500">
             AI Summary
           </p>
@@ -40,7 +40,7 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
           </p>
         </div>
 
-        <div className="w-full max-w-xl space-y-4">
+        <div className="w-full space-y-5">
           <div className="space-y-4">
             <label htmlFor="topic" className="mb-2 block text-sm font-semibold text-slate-700">
               Topic
@@ -65,11 +65,11 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
 
           {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
 
-          <div className="min-h-48 rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-5">
+          <div className="w-full overflow-x-auto rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 sm:p-7">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
               Output
             </p>
-            <p className="mt-3 text-sm leading-7 text-slate-700">
+            <p className="mt-4 whitespace-pre-line text-[15px] leading-8 text-slate-700 sm:text-base">
               {summary || 'Your generated summary will appear here.'}
             </p>
           </div>

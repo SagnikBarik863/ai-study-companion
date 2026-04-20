@@ -12,7 +12,7 @@ export default function SubjectsPage() {
   return (
     <AppShell
       title="Subjects"
-      subtitle="Manage all your subjects in one place, then open any subject to track sessions and detailed progress."
+      subtitle="Manage all your subjects in one place, then open any subject to track sessions and study history."
     >
       <div className="page-stack">
         <FirebaseNotice />

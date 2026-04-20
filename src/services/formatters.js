@@ -41,15 +41,6 @@ export function formatMinutes(totalMinutes = 0) {
   return `${hours} hr ${remainder} min`;
 }
 
-export function getProgressValue(totalMinutes, sessionCount) {
-  if (!sessionCount) {
-    return 0;
-  }
-
-  const targetMinutes = Math.max(sessionCount * 60, 180);
-  return Math.min(100, Math.round((Number(totalMinutes || 0) / targetMinutes) * 100));
-}
-
 function normalizeSessionDate(value) {
   if (!value) {
     return null;

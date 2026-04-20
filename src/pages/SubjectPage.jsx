@@ -13,7 +13,7 @@ import StatusBanner from '../components/StatusBanner';
 import SubjectForm from '../components/SubjectForm';
 import { useAuth } from '../hooks/useAuth';
 import { useSubjectDetails } from '../hooks/useSubjectDetails';
-import { formatDisplayDate, formatMinutes, getProgressValue } from '../services/formatters';
+import { formatDisplayDate, formatMinutes } from '../services/formatters';
 
 export default function SubjectPage() {
   const { id } = useParams();
@@ -30,13 +30,11 @@ export default function SubjectPage() {
     const totalDuration = subject?.totalDuration || 0;
     const totalSessions = subject?.sessionCount || 0;
     const averagePerSession = totalSessions ? Math.round(totalDuration / totalSessions) : 0;
-    const progress = getProgressValue(totalDuration, totalSessions);
 
     return {
       totalDuration,
       totalSessions,
       averagePerSession,
-      progress,
     };
   }, [subject]);
 
@@ -100,7 +98,7 @@ export default function SubjectPage() {
       title={subject?.title || 'Subject details'}
       subtitle={
         subject?.description ||
-        'Review subject progress, add study sessions, and generate quick summaries for revision.'
+        'Review subject details, add study sessions, and keep a clear revision history.'
       }
       actions={
         <div className="flex flex-wrap gap-3">
@@ -172,7 +170,7 @@ export default function SubjectPage() {
               <StatsCard
                 label="Average Session"
                 value={formatMinutes(metrics.averagePerSession)}
-                helper={`${metrics.progress}% completion intensity`}
+                helper="Average time spent per logged study session"
                 tone="default"
               />
             </section>

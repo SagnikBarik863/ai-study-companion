@@ -47,14 +47,14 @@ export default function SignupPage() {
                 Turn scattered study notes into a system you can actually trust.
               </h2>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-                Set up subjects, keep a clean session history, review progress, and generate
+                Set up subjects, keep a clean session history, review your study habits, and generate
                 concise topic summaries whenever revision gets noisy.
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="glass-card p-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">
-                  Progress view
+                  Study overview
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-600">
                   See subject totals, session counts, and time investment at a glance.

@@ -6,7 +6,7 @@ export default function SessionHistory({ sessions, onDelete, busyId }) {
       {sessions.map((session) => (
         <article
           key={session.id}
-          className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
+          className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-3">
@@ -34,4 +34,3 @@ export default function SessionHistory({ sessions, onDelete, busyId }) {
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -9,6 +9,8 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const SubjectsPage = lazy(() => import('./pages/SubjectsPage'));
+const SummaryPage = lazy(() => import('./pages/SummaryPage'));
 const SubjectPage = lazy(() => import('./pages/SubjectPage'));
 
 function RootRedirect() {
@@ -23,6 +25,11 @@ function RootRedirect() {
   }
 
   return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
+}
+
+function LegacySubjectRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/subjects/${id}`} replace />;
 }
 
 export default function App() {
@@ -61,10 +68,30 @@ export default function App() {
           }
         />
         <Route
-          path="/subject/:id"
+          path="/subjects"
+          element={
+            <ProtectedRoute>
+              <SubjectsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subjects/:id"
           element={
             <ProtectedRoute>
               <SubjectPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subject/:id"
+          element={<LegacySubjectRedirect />}
+        />
+        <Route
+          path="/summary"
+          element={
+            <ProtectedRoute>
+              <SummaryPage />
             </ProtectedRoute>
           }
         />

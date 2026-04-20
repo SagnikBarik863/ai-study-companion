@@ -1,29 +1,32 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import AppShell from '../components/AppShell';
-import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import FirebaseNotice from '../components/FirebaseNotice';
 import LoadingSpinner from '../components/LoadingSpinner';
-import Modal from '../components/Modal';
 import StatsCard from '../components/StatsCard';
 import StatusBanner from '../components/StatusBanner';
-import SubjectCard from '../components/SubjectCard';
-import SubjectForm from '../components/SubjectForm';
-import SummaryGenerator from '../components/SummaryGenerator';
+import SummaryPreviewCard from '../components/SummaryPreviewCard';
+import WeeklyActivityChart from '../components/WeeklyActivityChart';
 import { useAuth } from '../hooks/useAuth';
+import { useStudyStreak } from '../hooks/useStudyStreak';
 import { useSubjects } from '../hooks/useSubjects';
-import { formatMinutes } from '../services/formatters';
+import {
+  calculateWeeklyActivity,
+  formatMinutes,
+  formatStudyStreakMessage,
+  getProgressValue,
+} from '../services/formatters';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { subjects, loading, hasFetched, error, addSubject, editSubject, removeSubject, clearError } =
-    useSubjects(user?.uid);
-  const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
-  const [activeSubject, setActiveSubject] = useState(null);
-  const [subjectBusy, setSubjectBusy] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [deleteBusy, setDeleteBusy] = useState(false);
-  const [actionError, setActionError] = useState('');
+  const { subjects, loading, hasFetched, error, clearError } = useSubjects(user?.uid);
+  const {
+    streak,
+    sessions,
+    loading: streakLoading,
+    error: streakError,
+  } = useStudyStreak(user?.uid, subjects, hasFetched);
 
   const stats = useMemo(() => {
     const totalSessions = subjects.reduce((sum, subject) => sum + (subject.sessionCount || 0), 0);
@@ -38,83 +41,26 @@ export default function DashboardPage() {
     };
   }, [subjects]);
 
-  const openCreateModal = useCallback(() => {
-    setActiveSubject(null);
-    setActionError('');
-    setIsSubjectModalOpen(true);
-  }, []);
-
-  const openEditModal = useCallback((subject) => {
-    setActiveSubject(subject);
-    setActionError('');
-    setIsSubjectModalOpen(true);
-  }, []);
-
-  const closeSubjectModal = useCallback(() => {
-    setIsSubjectModalOpen(false);
-    setActiveSubject(null);
-    setActionError('');
-  }, []);
-
-  const handleSubjectSubmit = useCallback(
-    async (formValues) => {
-      setSubjectBusy(true);
-      setActionError('');
-
-      try {
-        if (activeSubject) {
-          await editSubject(activeSubject.id, formValues);
-        } else {
-          await addSubject(formValues);
-        }
-        closeSubjectModal();
-      } catch (submitError) {
-        setActionError(submitError.message);
-      } finally {
-        setSubjectBusy(false);
-      }
-    },
-    [activeSubject, addSubject, closeSubjectModal, editSubject],
-  );
-
-  const handleDeleteSubject = useCallback(async () => {
-    if (!deleteTarget) {
-      return;
-    }
-
-    setDeleteBusy(true);
-    setActionError('');
-
-    try {
-      await removeSubject(deleteTarget.id);
-      setDeleteTarget(null);
-    } catch (deleteError) {
-      setActionError(deleteError.message);
-    } finally {
-      setDeleteBusy(false);
-    }
-  }, [deleteTarget, removeSubject]);
-
+  const weeklyActivity = useMemo(() => calculateWeeklyActivity(sessions), [sessions]);
   const showSubjectsLoading = loading && !hasFetched;
+  const recentSubjects = subjects.slice(0, 3);
 
   return (
     <AppShell
       title="Dashboard"
-      subtitle="Stay on top of your study plan with fast subject management, session tracking, and quick AI-assisted revision."
+      subtitle="See your overall study momentum, review recent subjects, and jump quickly into focused work."
       actions={
-        <button type="button" onClick={openCreateModal} className="btn-primary">
-          Add subject
-        </button>
+        <Link to="/subjects" className="btn-primary">
+          Manage Subjects
+        </Link>
       }
     >
-      <div className="space-y-6">
+      <div className="page-stack">
         <FirebaseNotice />
-        <StatusBanner kind="error" message={error || actionError} onDismiss={() => {
-          clearError();
-          setActionError('');
-        }} />
+        <StatusBanner kind="error" message={error} onDismiss={clearError} />
+        <StatusBanner kind="error" message={streakError} />
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-2 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatsCard
             label="Subjects"
             value={stats.totalSubjects}
@@ -141,87 +87,97 @@ export default function DashboardPage() {
           />
         </section>
 
-        <SummaryGenerator />
-
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900">Your subjects</h2>
-              <p className="text-sm text-slate-600">
-                Create, edit, and review every study area from one place.
-              </p>
+        <section className="mt-8">
+          <div className="rounded-[2rem] border border-accent-100 bg-gradient-to-br from-accent-50 via-white to-orange-50 p-6 shadow-glow">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent-700">
+                  Study Streak
+                </p>
+                <h2 className="mt-3 text-4xl font-bold text-slate-900">
+                  {streakLoading ? '...' : streak}
+                </h2>
+                <p className="mt-2 text-base font-medium text-slate-700">
+                  {streakLoading
+                    ? 'Calculating consecutive days...'
+                    : formatStudyStreakMessage(streak)}
+                </p>
+              </div>
+              <div className="rounded-3xl bg-white/80 px-5 py-4 text-sm leading-6 text-slate-600 shadow-sm">
+                Consecutive days are counted from your real logged session dates without gaps.
+              </div>
             </div>
           </div>
+        </section>
 
-          {showSubjectsLoading ? (
-            <LoadingSpinner label="Loading your subjects..." />
-          ) : subjects.length ? (
-            <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
-              {subjects.map((subject) => (
-                <SubjectCard
-                  key={subject.id}
-                  subject={subject}
-                  onEdit={openEditModal}
-                  onDelete={setDeleteTarget}
-                />
-              ))}
+        <section className="mt-8">
+          <WeeklyActivityChart activity={weeklyActivity} />
+        </section>
+
+        <section className="mt-8">
+          <div className="section-card">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-accent-700">
+                  Overview
+                </p>
+                <h2 className="mt-3 text-2xl font-bold text-slate-900">Recent subjects</h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  Jump back into the areas you have been tracking most recently.
+                </p>
+              </div>
+              <Link to="/subjects" className="btn-secondary">
+                View all
+              </Link>
             </div>
-          ) : (
-            <EmptyState
-              title="No subjects yet"
-              description={`No subjects yet. Click 'Add Subject' to get started.`}
-              action={
-                <button type="button" onClick={openCreateModal} className="btn-primary">
-                  Add Subject
-                </button>
-              }
-            />
-          )}
+
+            <div className="mt-6">
+              {showSubjectsLoading ? (
+                <LoadingSpinner label="Loading subject overview..." />
+              ) : recentSubjects.length ? (
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {recentSubjects.map((subject) => (
+                    <Link
+                      key={subject.id}
+                      to={`/subjects/${subject.id}`}
+                      className="block rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <h3 className="text-xl font-bold text-slate-900">{subject.title}</h3>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">
+                            {subject.description}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+                          <p className="text-slate-500">Progress</p>
+                          <p className="mt-1 font-semibold text-slate-900">
+                            {getProgressValue(subject.totalDuration, subject.sessionCount)}%
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No subjects yet"
+                  description="Create your first subject in the Subjects page to start building your study system."
+                  action={
+                    <Link to="/subjects" className="btn-primary">
+                      Go to Subjects
+                    </Link>
+                  }
+                />
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <SummaryPreviewCard />
         </section>
       </div>
-
-      {isSubjectModalOpen ? (
-        <Modal
-          title={activeSubject ? 'Edit subject' : 'Add a new subject'}
-          description="Keep the description practical so you can quickly remember what belongs in this subject."
-          onClose={closeSubjectModal}
-        >
-          <div className="space-y-4">
-            <StatusBanner kind="error" message={actionError} onDismiss={() => setActionError('')} />
-            <SubjectForm
-              initialValues={
-                activeSubject
-                  ? {
-                      title: activeSubject.title,
-                      description: activeSubject.description,
-                    }
-                  : undefined
-              }
-              onSubmit={handleSubjectSubmit}
-              onCancel={closeSubjectModal}
-              submitLabel={activeSubject ? 'Update subject' : 'Create subject'}
-              busy={subjectBusy}
-            />
-          </div>
-        </Modal>
-      ) : null}
-
-      {deleteTarget ? (
-        <Modal
-          title="Delete subject"
-          description={`This will remove "${deleteTarget.title}" and all of its study sessions.`}
-          onClose={() => setDeleteTarget(null)}
-        >
-          <ConfirmDialog
-            title="Delete subject"
-            description="This action cannot be undone. The subject document and its nested sessions will be deleted from Firestore."
-            confirmLabel="Delete subject"
-            onConfirm={handleDeleteSubject}
-            onCancel={() => setDeleteTarget(null)}
-            busy={deleteBusy}
-          />
-        </Modal>
-      ) : null}
     </AppShell>
   );
 }

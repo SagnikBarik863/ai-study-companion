@@ -11,7 +11,6 @@ import SessionHistory from '../components/SessionHistory';
 import StatsCard from '../components/StatsCard';
 import StatusBanner from '../components/StatusBanner';
 import SubjectForm from '../components/SubjectForm';
-import SummaryGenerator from '../components/SummaryGenerator';
 import { useAuth } from '../hooks/useAuth';
 import { useSubjectDetails } from '../hooks/useSubjectDetails';
 import { formatDisplayDate, formatMinutes, getProgressValue } from '../services/formatters';
@@ -124,13 +123,16 @@ export default function SubjectPage() {
         </div>
       }
     >
-      <div className="space-y-6">
+      <div className="page-stack">
         <FirebaseNotice />
         <StatusBanner kind="error" message={error || actionError} onDismiss={dismissErrors} />
 
         <div>
-          <Link to="/dashboard" className="text-sm font-semibold text-accent-700">
-            Back to dashboard
+          <Link
+            to="/subjects"
+            className="inline-flex items-center rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-accent-700 shadow-sm transition hover:bg-white"
+          >
+            Back to subjects
           </Link>
         </div>
 
@@ -175,9 +177,7 @@ export default function SubjectPage() {
               />
             </section>
 
-            <SummaryGenerator defaultTopic={subject.title} />
-
-            <section className="glass-card p-6">
+            <section className="section-card">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">Session history</h2>

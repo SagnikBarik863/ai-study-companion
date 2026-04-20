@@ -5,7 +5,7 @@ export default function SubjectCard({ subject, onEdit, onDelete }) {
   const progress = getProgressValue(subject.totalDuration, subject.sessionCount);
 
   return (
-    <article className="glass-card h-full p-6">
+    <article className="glass-card flex h-full flex-col p-6 transition duration-200 hover:-translate-y-1 hover:shadow-2xl">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent-700">
@@ -41,8 +41,8 @@ export default function SubjectCard({ subject, onEdit, onDelete }) {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <Link to={`/subject/${subject.id}`} className="btn-primary flex-1">
+      <div className="mt-6 flex flex-1 flex-col justify-end gap-3 sm:flex-row">
+        <Link to={`/subjects/${subject.id}`} className="btn-primary flex-1">
           Open subject
         </Link>
         <button type="button" onClick={() => onEdit(subject)} className="btn-secondary flex-1">

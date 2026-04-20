@@ -27,8 +27,8 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
   }, [topic]);
 
   return (
-    <section className="glass-card p-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+    <section className="section-card">
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-xl">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-coral-500">
             AI Summary
@@ -41,7 +41,7 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
         </div>
 
         <div className="w-full max-w-xl space-y-4">
-          <div>
+          <div className="space-y-4">
             <label htmlFor="topic" className="mb-2 block text-sm font-semibold text-slate-700">
               Topic
             </label>
@@ -54,13 +54,18 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
             />
           </div>
 
-          <button type="button" onClick={handleGenerate} className="btn-primary" disabled={loading}>
+          <button
+            type="button"
+            onClick={handleGenerate}
+            className="btn-primary w-full sm:w-auto"
+            disabled={loading}
+          >
             {loading ? 'Generating summary...' : 'Generate summary'}
           </button>
 
           {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
 
-          <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-4">
+          <div className="min-h-48 rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
               Output
             </p>

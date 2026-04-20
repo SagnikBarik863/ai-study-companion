@@ -1,87 +1,69 @@
-function wait(ms) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+const DEFAULT_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+function buildPrompt(topic) {
+  return `Generate a concise study summary for the topic: "${topic}".
+
+Format your response exactly like this:
+
+Topic: ${topic}
+
+Definition: [2-3 sentence explanation of what this topic is]
+
+Key Points:
+1. [First key point]
+2. [Second key point]
+3. [Third key point]
+4. [Fourth key point]
+
+Example: [A practical, concrete example showing the topic in action]
+
+Common Mistake: [A common misconception or error students make with this topic]
+
+Keep each section brief and focused on helping a student revise quickly.`;
 }
 
-const definitionTemplates = [
-  (topic) => `${topic} is a study concept that explains how the main idea, structure, and purpose of the topic work together in practice.`,
-  (topic) => `${topic} refers to a core academic idea that helps you understand how a system, event, or method behaves under specific conditions.`,
-  (topic) => `${topic} is best understood as a topic that connects theory with application, showing why the concept matters beyond memorizing the name.`,
-];
-
-const keyPointTemplates = [
-  (topic) => `Start by identifying the central rule or principle behind ${topic}; most exam questions test whether you understand that foundation first.`,
-  (topic) => `Break ${topic} into smaller parts or stages so you can explain the flow instead of only recalling isolated facts.`,
-  (topic) => `Pay attention to how ${topic} behaves in real scenarios, especially what changes when inputs, conditions, or assumptions change.`,
-  (topic) => `Link ${topic} to related concepts you already know, because comparison usually makes the differences and strengths clearer.`,
-  (topic) => `Focus on the vocabulary used in ${topic}; precise terms often signal the exact mechanism or meaning you are expected to recall.`,
-  (topic) => `When revising ${topic}, ask what causes it, what it produces, and what limits or exceptions apply.`,
-];
-
-const exampleTemplates = [
-  (topic) => `Example: if you were teaching ${topic} to a classmate, you would explain the core idea first, then walk through one concrete scenario where it clearly applies.`,
-  (topic) => `Example: a typical problem on ${topic} might ask you to analyze a situation, identify the governing idea, and justify why that interpretation is correct.`,
-  (topic) => `Example: in a real study setting, you could use ${topic} by taking one simple case, labeling each step, and checking how the outcome follows from the concept.`,
-];
-
-const mistakeTemplates = [
-  (topic) => `Common mistake: treating ${topic} as a definition to memorize without understanding how or when it should be applied.`,
-  (topic) => `Common mistake: mixing ${topic} up with a related idea and missing the condition that makes this topic distinct.`,
-  (topic) => `Common mistake: skipping the underlying logic of ${topic} and jumping straight to the final answer or formula.`,
-];
-
-function pickTemplate(templates, seed, offset = 0) {
-  const index = (seed + offset) % templates.length;
-  return templates[index];
-}
-
-function buildSeed(topic) {
-  return Array.from(topic).reduce((sum, character) => sum + character.charCodeAt(0), 0);
-}
-
-function buildKeyPoints(topic, seed) {
-  const selected = [];
-  let offset = 0;
-
-  while (selected.length < 4 && offset < keyPointTemplates.length * 2) {
-    const candidate = pickTemplate(keyPointTemplates, seed, offset)(topic);
-
-    if (!selected.includes(candidate)) {
-      selected.push(candidate);
-    }
-
-    offset += 1;
-  }
-
-  return selected.slice(0, 4);
-}
-
-export async function generateTopicSummary(topic) {
+export async function generateTopicSummary(topic, customApiKey = '') {
   const cleanTopic = topic.trim();
 
   if (!cleanTopic) {
     throw new Error('Enter a topic to generate a summary.');
   }
 
-  await wait(800);
+  const apiKey = customApiKey.trim() || DEFAULT_API_KEY;
 
-  const seed = buildSeed(cleanTopic.toLowerCase());
-  const definition = pickTemplate(definitionTemplates, seed)(cleanTopic);
-  const keyPoints = buildKeyPoints(cleanTopic, seed);
-  const example = pickTemplate(exampleTemplates, seed, 1)(cleanTopic);
-  const mistake = pickTemplate(mistakeTemplates, seed, 2)(cleanTopic);
+  if (!apiKey) {
+    throw new Error('No Groq API key found. Please enter your API key.');
+  }
 
-  return [
-    `Topic: ${cleanTopic}`,
-    '',
-    `Definition: ${definition}`,
-    '',
-    'Key Points:',
-    ...keyPoints.map((point, index) => `${index + 1}. ${point}`),
-    '',
-    example,
-    '',
-    mistake,
-  ].join('\n');
+  const response = await fetch(GROQ_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: 'user', content: buildPrompt(cleanTopic) }],
+      temperature: 0.7,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const message = errorData?.error?.message || `API error: ${response.status}`;
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  const text = data?.choices?.[0]?.message?.content;
+
+  if (!text) {
+    throw new Error('No response received from Groq. Please try again.');
+  }
+
+  return text.trim();
 }

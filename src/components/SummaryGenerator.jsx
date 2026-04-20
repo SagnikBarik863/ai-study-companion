@@ -6,6 +6,8 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [customApiKey, setCustomApiKey] = useState('');
 
   useEffect(() => {
     setTopic(defaultTopic);
@@ -16,7 +18,7 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
     setError('');
 
     try {
-      const response = await generateTopicSummary(topic);
+      const response = await generateTopicSummary(topic, customApiKey);
       setSummary(response);
     } catch (generationError) {
       setError(generationError.message);
@@ -24,7 +26,7 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
     } finally {
       setLoading(false);
     }
-  }, [topic]);
+  }, [topic, customApiKey]);
 
   return (
     <section className="section-card">
@@ -35,8 +37,8 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
           </p>
           <h2 className="mt-3 text-2xl font-bold text-slate-900">Generate a quick study recap</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Enter a topic and get a short mock AI summary that can help with revision, note
-            cleanup, and last-minute preparation.
+            Enter a topic and get an AI-generated summary to help with revision, note cleanup, and
+            last-minute preparation.
           </p>
         </div>
 
@@ -52,6 +54,34 @@ export default function SummaryGenerator({ defaultTopic = '' }) {
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
             />
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between text-sm font-semibold text-slate-600 hover:text-slate-900"
+              onClick={() => setShowApiKeyInput((prev) => !prev)}
+            >
+              <span>Use your own Groq API key (optional)</span>
+              <span className="ml-2 text-xs text-slate-400">{showApiKeyInput ? '▲ Hide' : '▼ Show'}</span>
+            </button>
+
+            {showApiKeyInput && (
+              <div className="mt-3 space-y-2">
+                <input
+                  id="customApiKey"
+                  type="password"
+                  className="input-field"
+                  placeholder="Paste your Groq API key here"
+                  value={customApiKey}
+                  onChange={(event) => setCustomApiKey(event.target.value)}
+                />
+                <p className="text-xs text-slate-500">
+                  Leave blank to use the default key. Your key is never stored or sent anywhere
+                  except the Groq API.
+                </p>
+              </div>
+            )}
           </div>
 
           <button

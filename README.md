@@ -17,7 +17,7 @@ AI Study Companion is a production-ready React application for students who want
 - User-specific subject CRUD with Firestore
 - Study session tracking by subject
 - Aggregate progress stats on the dashboard
-- AI summary generator with a reliable mock fallback
+- AI summary generator powered by Groq (llama-3.3-70b-versatile) with optional custom API key support
 - Responsive UI with loading and error states
 
 ## Project Structure
@@ -100,5 +100,7 @@ npm run build
 ## Notes
 
 - If Firebase config is missing, the UI still loads and shows setup guidance.
-- The AI summary feature currently uses a mock generator so the app remains functional without an external API.
+- The AI summary feature uses the [Groq API](https://console.groq.com/) with `llama-3.3-70b-versatile` to generate real study summaries.
+- A default Groq API key is bundled via `VITE_GROQ_API_KEY` in `.env.local`. Users can also paste their own key directly in the Summary Generator UI without changing any config.
+- To use your own key, get one free at https://console.groq.com/keys and either set `VITE_GROQ_API_KEY` in `.env.local` or enter it in the optional key field on the Summary page.
 

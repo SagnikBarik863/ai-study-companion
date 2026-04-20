@@ -1,79 +1,59 @@
 # AI Study Companion
 
-AI Study Companion is a production-ready React application for students who want to manage subjects, log study sessions, monitor progress, and generate quick AI-powered summaries for revision.
+A React app for students to manage subjects, log study sessions, track progress, and generate AI-powered summaries for revision.
 
 ## Tech Stack
 
-- React with Vite
+- React + Vite
 - React Router
-- Firebase Authentication
-- Firestore Database
+- Firebase Authentication & Firestore
 - Tailwind CSS
+- Groq API (`llama-3.3-70b-versatile`) for AI summaries
 
 ## Features
 
 - Email/password signup and login
-- Protected dashboard and subject routes
-- User-specific subject CRUD with Firestore
-- Study session tracking by subject
+- Subject CRUD with per-user Firestore storage
+- Study session logging per subject
 - Aggregate progress stats on the dashboard
-- AI summary generator powered by Groq (llama-3.3-70b-versatile) with optional custom API key support
-- Responsive UI with loading and error states
+- AI summary generator with optional custom Groq API key
 
-## Project Structure
+## Getting Started
 
-```text
-src/
-  components/
-  context/
-  hooks/
-  pages/
-  services/
+### 1. Clone and install
+
+```bash
+npm install
 ```
 
-## Firebase Setup
+### 2. Configure environment
 
-1. Create a Firebase project at https://console.firebase.google.com/.
-2. Add a Web app to the project.
-3. Enable `Authentication` and turn on the `Email/Password` provider.
-4. Create a Firestore database in production or test mode.
-5. Copy `.env.example` to `.env.local`.
-6. Paste your Firebase values into `.env.local`.
-
-Example:
+Copy `.env.example` to `.env.local` and fill in your Firebase config and Groq API key:
 
 ```bash
 cp .env.example .env.local
 ```
 
-## Recommended Firestore Structure
+### 3. Firebase setup
 
-```text
-users/{uid}/subjects/{subjectId}
-users/{uid}/subjects/{subjectId}/sessions/{sessionId}
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Add a Web app and copy the config values into `.env.local`
+3. Enable **Authentication → Email/Password**
+4. Create a **Firestore** database
+
+### 4. Run
+
+```bash
+npm run dev
 ```
 
-Each subject document stores:
+```bash
+npm run build   # production build
+```
 
-- `title`
-- `description`
-- `createdAt`
-- `updatedAt`
-- `sessionCount`
-- `totalDuration`
+## Firestore Security Rules
 
-Each session document stores:
-
-- `date`
-- `duration`
-- `notes`
-- `createdAt`
-
-## Firestore Rules Starter
-
-Use rules like these so each user can access only their own data:
-
-```text
+```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -84,23 +64,7 @@ service cloud.firestore {
 }
 ```
 
-## Install And Run
-
-```bash
-npm install
-npm run dev
-```
-
-Create a production build with:
-
-```bash
-npm run build
-```
-
 ## Notes
 
-- If Firebase config is missing, the UI still loads and shows setup guidance.
-- The AI summary feature uses the [Groq API](https://console.groq.com/) with `llama-3.3-70b-versatile` to generate real study summaries.
-- A default Groq API key is bundled via `VITE_GROQ_API_KEY` in `.env.local`. Users can also paste their own key directly in the Summary Generator UI without changing any config.
-- To use your own key, get one free at https://console.groq.com/keys and either set `VITE_GROQ_API_KEY` in `.env.local` or enter it in the optional key field on the Summary page.
-
+- If Firebase config is missing the app still loads and shows setup guidance.
+- The AI summary feature uses the [Groq API](https://console.groq.com/). A default key is set via `VITE_GROQ_API_KEY` in `.env.local`, or users can enter their own key directly in the Summary page UI.
